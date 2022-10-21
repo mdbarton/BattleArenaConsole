@@ -10,7 +10,6 @@ namespace BattleArenaConsole_v2.Objects.Combatants
 {
 	internal class Fighter : Combatant
 	{
-
 		public Fighter() {
 			this.CharacterClass = nameof(Fighter);
 			//this.CharacterClass = "Figther"; //look close, this is the reason to use nameod()
