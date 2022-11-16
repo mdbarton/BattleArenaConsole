@@ -1,6 +1,11 @@
 # BattleArenaConsole
 Basic Sample Project for D&D style game to demonstrate some basic aspects of OOP and different types of .net projects
 
+# How to use this tutorial:
+If you don't have it, download Visual Studio...
+File > Open From Source...
+
+You can change the ".com" in the url to ".dev" to open the project in your browser but you will not be able to run it.
 
 UPCOMING:
 - Class Library
