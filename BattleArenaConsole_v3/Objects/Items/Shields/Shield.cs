@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 
 namespace BattleArenaConsole_v3.Objects.Items.Shields
 {
-	internal abstract class Shield : IItem
+	//WE'VE NOW MADE "Shield" an interface - ideally 
+	//previously, Shield was an abstract class
+	internal interface IShield : IItem
 	{
 		public string? Name { get; set; }
 		public Int16 Weight { get; set; }
@@ -18,7 +20,5 @@ namespace BattleArenaConsole_v3.Objects.Items.Shields
 		[DefaultValue(2)]
 		public Int16 DefenseModifier { get; set; }
 		public string? Description { get; set; }
-
-
 	}
 }

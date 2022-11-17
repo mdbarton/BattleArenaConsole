@@ -22,6 +22,8 @@ namespace BattleArenaConsole_v3.Objects.Locations
 		//the default we're setting it to below is somewhat academic, the list/collection is still empyu
 		//if we didn't set it to "new List<>" however, it would still be null which would throw an error when calling "Add"
 		private List<Combatant> Challengers { get; set; } = new List<Combatant>();
+		//private List<List<Combatant>> ChallengerGroup { get; set; } = new List<List<Combatant>>();
+		private Array combatGroups;
 
 		public string Name { get; set; } = nameof(Arena);
 
@@ -32,11 +34,13 @@ namespace BattleArenaConsole_v3.Objects.Locations
 
 			//we don't need the below line because we set it as the default value, otherwise the below "Add" would fail
 			//Challengers = new List<Combatant>();
-			this.Challengers.Add(new Paladin());
+			this.Challengers.Add(new Hobgoblin());
 			this.Challengers.Add(new Fighter());
 			this.Challengers.Add(new Bard());
 			this.Challengers.Add(new Rogue());
 		}
+
+		//add function to fight collection of combatants?
 
 		public void Run(Combatant p) {
 			this.Player = p;
@@ -79,8 +83,8 @@ namespace BattleArenaConsole_v3.Objects.Locations
 							{
 								Display.DisplayText("Your enemy is dead...", ConsoleColor.DarkRed);
 								//we're putting the placeholder for levels/exp points but we'll add logic in a later branch
-								Display.DisplayText("You've gained X Experience Points.");
-
+								Display.DisplayText("You've gained " + opponent.XPAwarded.ToString() + " Experience Points.");
+								this.Player.AddExperience(opponent.XPAwarded);
 								p.GoldPieces += opponent.GoldPieces;
 								Display.DisplayText("You've gained " + opponent.GoldPieces.ToString() + " Gold Pieces.");
 
@@ -90,8 +94,9 @@ namespace BattleArenaConsole_v3.Objects.Locations
 									Display.Write("You have " + this.Challengers.Count.ToString() + " challengers remaining");
 								} else {
 									Display.DisplayText("You have defeated all challengers!", ConsoleColor.Yellow);
-									Display.Write("You win the trophy and 50 Gold Pieces.");
+									Display.Write("You win the trophy, 50 Gold Pieces and 250 Experience Points.");
 									this.Player.GoldPieces += 50;
+									this.Player.AddExperience(250);
 								}
 								//we'll add more tournament logic later
 							}

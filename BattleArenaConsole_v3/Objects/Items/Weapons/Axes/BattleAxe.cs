@@ -13,8 +13,6 @@ namespace BattleArenaConsole_v3.Objects.Items.Weapons//.Axes
 			this.DamageRoll = "1d12";
 			this.HandsRequired = 2;
 			this.Cost = 20;
-
 		}
-
 	}
 }

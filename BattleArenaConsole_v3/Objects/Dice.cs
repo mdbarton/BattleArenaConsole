@@ -12,6 +12,8 @@ namespace BattleArenaConsole_v3.Objects
 	{
 		public Int16 Sides { get; set; }
 		private Int16 Rolls { get; set; }
+
+		private Int16 RollModifier { get; set; } = 0;
 		 
 		public Dice() { }
 		public Dice(Int16 sides = 20)
@@ -19,31 +21,13 @@ namespace BattleArenaConsole_v3.Objects
 			this.Sides = sides;
 			this.Rolls = 1;
 		}
-		public Int32 Roll()
-		{
-			Int32 result = 0;
-			Random d = new Random();
-			for (var x = 0; x < this.Rolls; x++)
-			{
-				result += d.Next(1, this.Sides + 1);
-			}
-			return result; // + modifer
-		}
-		public Int32 Roll(Int16 timesToRoll)
-		{
-			this.Rolls = timesToRoll;
-			return this.Roll();
-		}
-		
-		public Int32 Roll(String rollType)
+		public Dice(string rollType)
 		{
 			try
 			{
-				//it's probably better to put this logice in a constructor to conform to our other constructors
-				//we'll mix it up on next iteration as we account for some new logic
-				//it's ok to make a choice early on that you refactor later
-				string pattern = @"(\\d+)?d(\\d+)([\\+\\-]\\d+)?";
-				pattern = @"^(\d+)d(\d+)(\/-?\d+)?$";
+				// we moved this code from the Roll method to this constructor as it makes more sense
+				// we've also implemented using the roll modifier
+				string pattern = @"^(\d+)d(\d+)(\/-?\d+)?$";
 
 				Match match = Regex.Match(rollType, pattern, RegexOptions.IgnoreCase);
 
@@ -53,13 +37,27 @@ namespace BattleArenaConsole_v3.Objects
 
 				this.Rolls = Int16.Parse(rolls);
 				this.Sides = Int16.Parse(sides);
-
+				this.RollModifier = Int16.Parse(rollModifier);
 			}
 			catch (Exception ex)
 			{
 				Console.WriteLine(ex.Message.ToString());
 			}
-			return this.Roll(); //now calls the base method
+		}
+		public Int32 Roll()
+		{
+			Int32 result = 0;
+			Random d = new Random();
+			for (var x = 0; x < this.Rolls; x++)
+			{
+				result += d.Next(1, this.Sides + 1);
+			}
+			return result + this.RollModifier; // + modifer
+		}
+		public Int32 Roll(Int16 timesToRoll)
+		{
+			this.Rolls = timesToRoll;
+			return this.Roll();
 		}
 	}
 }

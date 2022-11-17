@@ -11,11 +11,12 @@ using Display = BattleArenaConsole_v3.DisplayPresentation;
 
 namespace BattleArenaConsole_v3.Objects.Locations
 {
+	//We intended this as an interfance but...
 	internal abstract class ILocation
 	{
 		public string Name { get; }
 
-		public void Run(Combatants.Combatant player) {	}
+		public void Run(Combatants.Combatant player) { 	}
 
 		//This is another "less than ideal" way to implement, we'll improve it soon
 		//by making this an abstract class, we can add the getInput method here and all derived classes will already have it

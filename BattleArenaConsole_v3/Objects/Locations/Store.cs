@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -37,17 +38,18 @@ namespace BattleArenaConsole_v3.Objects.Locations
 				Display.Write("I have a " + item.Name + "(" + item.DamageRoll + ") on sale for " + item.Cost.ToString() + " Gold Pieces.");
 			}
 			Display.DisplayText("LOOK AT MY SHIELDS!", ConsoleColor.Green);
-			foreach (Shield item in Wares.Where(t => t.GetType().IsSubclassOf(typeof(Shield))))
+			// We changed "Shield" from an abstract class to an interface to show the differences
+			//above "IsSubClassOf shows a class derived from another, here we invoke "GetInterfaces" for the class and make sure it contains IShield
+			foreach (IShield item in Wares.Where(t => t.GetType().GetInterfaces().Contains(typeof(IShield))))
 			{
 				Display.Write("I have a " + item.Name + "(" + item.DefenseModifier + ") on sale for " + item.Cost.ToString() + " Gold Pieces.");
 			}
-
 		}
 
 		public void Buy(string itemName, Combatants.Combatant player) {
 
 			IItem foundItem = this.findItem(itemName, this.Wares);
-			if (foundItem != null && player.GoldPieces > foundItem.Cost) {
+			if (foundItem != null && player.GoldPieces >= foundItem.Cost) {
 				player.GoldPieces -= foundItem.Cost;
 				Display.Write("You have bought " + foundItem.Name);
 				player.Inventory.Add((IItem)foundItem);
@@ -58,15 +60,13 @@ namespace BattleArenaConsole_v3.Objects.Locations
 		public void Sell(string itemName, Combatants.Combatant player) {
 			IItem foundItem = this.findItem(itemName, player.Inventory);
 
-			if (foundItem != null && player.GoldPieces > foundItem.Cost)
+			if (foundItem != null)
 			{
 				player.GoldPieces += foundItem.Cost;
-				// \/ differentiate weapon/shield
 				player.Inventory.Remove((IItem)foundItem);
 				this.Wares.Add(foundItem);
 				Display.Write("You sold " + foundItem.Name);
 			}
-
 		}
 
 		private IItem findItem(string itemName, List<IItem> listToSearch) {

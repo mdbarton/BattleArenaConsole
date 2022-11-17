@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,13 +13,16 @@ namespace BattleArenaConsole_v3.Objects.Combatants
 {
 	internal abstract class Combatant
 	{
+		public string PlayerName { get; set; }
 		public Int16 Strength { get; set; }
 		public Int16 Dexterity { get; set; }
 		public Int32 Hitpoints { get; set; }
 
 		//Here's part of the value of inhertiance and interfaces
 		//we can create a list of "Iitem"s that contains, weapons, shields. armor, etc.
-		public List<IItem> Inventory { get; set; }
+		//we've moved instantiating this list by default rather than in the constructor
+		public List<IItem> Inventory { get; set; } = new List<IItem>();
+
 
 		//won't implement > 2 hands combatants yet but krishna may arrive in a later iteration
 		public Int16 NumberOfHands { get; set; }
@@ -28,30 +32,53 @@ namespace BattleArenaConsole_v3.Objects.Combatants
 		public string AttackDisplayText { get; set; } = "Your opponent's "; // < this is a terrible way to handle this but we'll fix it later
 
 		public Weapon Weapon { get { return this._weapon; } }
-		private Weapon _weapon;
+		//we've moved setting Hands as the default here
+		private Weapon _weapon = new Hands();
 
-		public Shield Shield { get; set; }
-		private Shield _shield;
+		public IShield Shield { get; set; }
+		private IShield _shield;
 
 		public Int32 ExperiencePoints { get { return this._experiencePoints; } }
 		private Int32 _experiencePoints;
 
+		public Int32 XPtoLevelNeeded { get; set; } = 500;
+		public Int32 XPAwarded { get; set; } = 75;
+
 		public Int32 GoldPieces { get { return this._goldPieces; } set { this._goldPieces = value; } }
 		private Int32 _goldPieces = 10;
 		public Int16 Level { get { return this._level; } }
-		private Int16 _level;
+		private Int16 _level = 1;
 
 		public Int16 ArmorClass { get {return this._armorClass; } set {this._armorClass = value; } }
-		private Int16 _armorClass;
+		private Int16 _armorClass = 5;
 		public Combatant()
 		{
 			//automatically all classes deriving from Combatant will be armed with their hands
-			this._weapon = new Hands();
+			//this._weapon = new Hands();
 			this.CharacterClass = nameof(Combatant);
-			this.ArmorClass = 5;
+			//this.ArmorClass = 5;
 
-			this.Inventory = new List<IItem>(); // we could also do this as the Default value above
+			//this.Inventory = new List<IItem>(); // we could also do this as the Default value above
 			this.GoldPieces = 10;
+		}
+
+		public void AddExperience(Int32 experiencePoints)
+		{
+			//since ExperiencePoints is readonly (no set accessor) we have to create a way (this method) to add XP
+			//we do this so we can also check if those XP cause a level-up. There's other ways we could do this but for now...
+			this._experiencePoints += experiencePoints;
+			//now check to see if that allows the player to level up
+			if (this.ExperiencePoints > (this.Level * this.XPtoLevelNeeded)) {
+				Display.Write("YOU HAVE LEVELED UP!!!");
+				this.IncrementLevel();
+			}
+		}
+
+		public void IncrementLevel()
+		{
+			//at some point higher levels might confer new abilities...
+			this._level +=1;
+			//for now, we're just +1 the character level
 		}
 
 		//we have several versions of the "Arm" method, they're differentiated by "Signature" the input parameter expected
@@ -61,7 +88,7 @@ namespace BattleArenaConsole_v3.Objects.Combatants
 			this._weapon = w;
 		}
 
-		public void Arm(Shield s)
+		public void Arm(IShield s)
 		{
 			this._shield = s;
 			this.ArmorClass += s.DefenseModifier;
@@ -82,9 +109,10 @@ namespace BattleArenaConsole_v3.Objects.Combatants
 						if (item.GetType().IsSubclassOf(typeof(Weapon)))
 						{
 							this.Arm((Weapon)item);
-						} else if (item.GetType().IsSubclassOf(typeof(Shield)))
+						} else if (item.GetType().GetInterfaces().Contains(typeof(IShield)))
+						// since we've (temporarily) turned "Shield" into Interface "IShield" we need to update this....
 						{
-							this.Arm((Shield)item);
+							this.Arm((IShield)item);
 						}
 						foundItem = true;
 						Display.DisplayText("You have armed your " + item.Name);
@@ -105,11 +133,20 @@ namespace BattleArenaConsole_v3.Objects.Combatants
 			{
 				foreach (var item in this.Inventory)
 				{
-					Display.DisplayText("You have a " + item.Name);
+					//we'll handle this in a more elegant next iteration
+					string armed = "";
+					if (this.Weapon == item || this.Shield == item) armed = " (ARMED)";
+					Display.DisplayText("You have a " + item.Name + armed);
 				}
 			}
 		}
 
+		public void ShowCharacterStats() {
+		// as we added scope, we now have code here and in "TownSquare" that needs to be encapsulated into one place
+			Display.Write("Hi " + this.CharacterClass + ", Level:" + this.Level.ToString() + " (xp:" + this.ExperiencePoints.ToString() + "/" + (this.XPtoLevelNeeded * this.Level).ToString() + ")");
+			Display.Write("You have " + this.GoldPieces.ToString() + " Gold Pieces.");
+			this.ListInventory();
+		}
 		public Int16 DefensiveCounter()
 		{
 			//we'll still tackle this in another iteration
@@ -132,7 +169,7 @@ namespace BattleArenaConsole_v3.Objects.Combatants
 			string r = "Roll:" + roll.ToString() + " AC:" + opponent.ArmorClass.ToString() + " mod:" + opponent.Weapon.DefenseModifier.ToString();
 
 			if (strikeLands) {
-				var damage = new Dice().Roll(this.Weapon.DamageRoll);
+				var damage = new Dice(this.Weapon.DamageRoll).Roll();
 				Display.DisplayText(this.AttackDisplayText + this.Weapon.Name + " attack landed, causing " + damage.ToString() + " damage. (" + r + ")");
 				opponent.Hitpoints -= damage;
 			} else {

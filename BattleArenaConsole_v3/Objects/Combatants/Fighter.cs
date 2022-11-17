@@ -16,6 +16,7 @@ namespace BattleArenaConsole_v3.Objects.Combatants
 			this.Strength = 12;
 			this.Dexterity = 10;
 			this.Hitpoints = 20;
+			this.XPAwarded = 100;
 
 			ShortSword s = new ShortSword();
 			this.Inventory.Add(s);

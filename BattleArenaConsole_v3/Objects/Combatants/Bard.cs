@@ -13,7 +13,7 @@ namespace BattleArenaConsole_v3.Objects.Combatants
 			this.CharacterClass = nameof(Bard);
 			this.Strength = 10;
 			this.Dexterity = 15;
-
+			this.XPAwarded = 200;
 			//We're giving this class lots of Hitpoints because Bards get a bad rap, they're more punk than folk
 			this.Hitpoints = 40;
 		}
